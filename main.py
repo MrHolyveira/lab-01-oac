@@ -65,16 +65,18 @@ class MIPS_to_hex_converter():
     def execute(self):
         with open(self.input_file, 'r') as f:
             file_text = f.read()
-            data_area = self.get_clean_data_list(file_text, 0)
-            text_area = self.get_clean_data_list(file_text, 1)
+            data_area = self.__get_clean_data_list(file_text, 0)
+            text_area = self.__get_clean_data_list(file_text, 1)
+            self.__solve_data(data_area)
+            self.__solve_text(text_area)
     
-    def solve_data(self):
+    def __solve_data(self, data):
         pass
 
-    def solve_text(self):
+    def __solve_text(self, data):
         pass
 
-    def get_clean_data_list(self, data, split):
+    def __get_clean_data_list(self, data, split):
         data_list = data.split('.text')[split].split('\n')
         return [string for string in data_list if (string != "" and string != '.data')]
 
