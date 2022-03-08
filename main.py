@@ -76,7 +76,8 @@ class MIPS_to_hex_converter():
     def __solve_text(self, data):
         pass
 
-    def __get_clean_data_list(self, data, split):
+    @staticmethod
+    def __get_clean_data_list(data, split):
         data_list = data.split('.text')[split].split('\n')
         return [string for string in data_list if (string != "" and string != '.data')]
 
