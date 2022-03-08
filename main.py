@@ -1,7 +1,6 @@
-import re
-
 class MIPS_to_hex_converter():
     def __init__(self, input_file):
+
         self.input_file = input_file
         self.opCodeDict = {
         'add': '100000',
@@ -61,14 +60,13 @@ class MIPS_to_hex_converter():
         'movn':'0',
         'mul':'0',
         'teq':'0',
-
         }
 
     def execute(self):
         with open(self.input_file, 'r') as f:
             file_text = f.read()
-            textArea = self.get_clean_data_list(file_text, 1)
-            dataArea = self.get_clean_data_list(file_text, 0)
+            data_area = self.get_clean_data_list(file_text, 0)
+            text_area = self.get_clean_data_list(file_text, 1)
     
     def solve_data(self):
         pass
