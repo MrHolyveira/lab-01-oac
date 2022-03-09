@@ -134,7 +134,7 @@ class MIPS_to_hex_converter():
         for instruction in data:
             binary_answer = ""
             call = instruction.split()[0]
-            values = re.sub(call, '', instruction)
+            values = instruction[len(call):]
             values = re.sub(r' ', '', values).split(',')
             if call in self.R_type_instructions_func_codes.keys():
                 while len(values) != 3:
