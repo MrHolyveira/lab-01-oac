@@ -5,6 +5,8 @@ class MIPS_to_hex_converter():
 
         self.input_file = input_file
 
+        self.branch_instructions_list = ['beq', 'bne', 'blez', 'bgtz']
+
         '''
         TODO:   These instructions are yet to be implemented these instructions
         '''
@@ -41,7 +43,7 @@ class MIPS_to_hex_converter():
         'lb': '100000',
         'lbu': '100100',
         'lui': '001111',
-        'lw': '100010',
+        'lw': '100011',
         'sb': '101000',
         'sh': '101001',
         'slti': '001010',
@@ -50,10 +52,12 @@ class MIPS_to_hex_converter():
         'ori': '001101',
         'xori': '001110',
         }
+
         self.J_type_instructions_op_codes  = {
         'j': '000010',
         'jal': '000011',
         }
+
         #most R type instructions have 000000 op codes by default
         self.R_type_instructions_func_codes = {
         'add': '100000', 
@@ -83,6 +87,7 @@ class MIPS_to_hex_converter():
         'sub': '100010',
         'subu': '100011',
         }
+        
         self.register_translations = {
         '$zero': '00000',
         '$at': '00001',
@@ -116,7 +121,6 @@ class MIPS_to_hex_converter():
         '$sp': '11101',
         '$fp': '11110',
         '$ra': '11111',
-        'R_binary_zero': '00000',
         }
 
     def execute(self):
@@ -138,29 +142,67 @@ class MIPS_to_hex_converter():
             values = re.sub(r' ', '', values).split(',')
 
             if call in self.R_type_instructions_func_codes.keys():
-                answer += self.__solve_R_type_instructions(values, call)
+                answer += self.__solve_R_type_instructions(values, call, instruction)
 
             elif call in self.I_type_instructions_op_codes.keys():
-                pass
+                answer += self.__solve_I_type_instructions(values, call, instruction)
 
             elif call in self.J_type_instructions_op_codes.keys():
-                pass
+                answer += self.__solve_J_type_instructions(values, call, instruction)
 
             elif call in self.to_implement_instructions:
                 pass
 
             else:
                 raise ValueError("Unknown instruction")
-                
+
         print(answer)
         return answer
 
-    def __solve_R_type_instructions(self, values, call):
+
+    def __solve_J_type_instructions(self, values, call, instruction):
+        binary_answer = ''
+        register_values = self.__get_register_values(values)
+        immediate = self.__get_immediate_value(values, 26)
+
+        binary_answer += self.J_type_instructions_op_codes.get(call)
+
+        binary_answer += immediate
+
+        return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
+
+    def __solve_I_type_instructions(self, values, call, instruction):
+        binary_answer = ''
+        register_values = self.__get_register_values(values)
+        immediate = self.__get_immediate_value(values, 16)
+
+        binary_answer += self.I_type_instructions_op_codes.get(call)    
+
+        if call in self.branch_instructions_list:
+            if call == "beq" or call == "bne":
+                binary_answer += self.register_translations.get(register_values[0])
+                binary_answer += self.register_translations.get(register_values[1])
+            else:
+                binary_answer += self.register_translations.get(register_values[0])
+                if call == "bgez":
+                    binary_answer += '00001'
+                else:
+                    binary_answer += '00000'
+        else:
+            binary_answer += self.register_translations.get(register_values[1])
+            binary_answer += self.register_translations.get(register_values[0])
+
+        binary_answer += immediate
+
+        return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
+
+
+    def __solve_R_type_instructions(self, values, call, instruction):
         binary_answer = ''
 
         register_values = self.__get_register_values(values)
         while len(register_values) != 3:
-            register_values.append(self.register_translations.get('R_binary_zero'))
+            register_values.append(self.register_translations.get('$zero'))
 
         binary_answer += "000000"
 
@@ -172,7 +214,24 @@ class MIPS_to_hex_converter():
 
         binary_answer += self.R_type_instructions_func_codes.get(call)
 
-        return self.__convert_binary_to_hex(binary_answer) + '\n'
+        return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
+
+
+    @staticmethod
+    def __get_immediate_value(values, binary_length):
+        for value in values:
+            if value[0] != '$':
+                if '(' in  value:
+                    string_value = re.search(r'(\S+)\(\S+\)', value).group(1)
+                else:
+                    string_value = value
+                binary_string = bin(int(string_value))[2:]
+                if len(binary_string) != binary_length:
+                    zero_amount = binary_length - len(binary_string)
+                    for _ in range(zero_amount):
+                        binary_string = '0' + binary_string
+        return binary_string
+
 
     @staticmethod
     def __get_shift_amount(values):
@@ -181,13 +240,19 @@ class MIPS_to_hex_converter():
 
     @staticmethod
     def __get_register_values(values):
-        return [value for value in values if value[0] == '$']
+        register_list = []
+        for value in values:
+            if value[0] != '$' and '(' in value:
+                register_list.append(re.search(r'(\$\S{2})', value).group(1))
+            elif value[0] == '$':
+                register_list.append(value)
+        return register_list
 
     @staticmethod
     def __get_clean_data_list(data, split):
         data_list = data.split('.text')[split].split('\n')
         return [string for string in data_list if (string != "" and string != '.data')]
-    
+        
     @staticmethod
     def __convert_binary_to_hex(string):
         decimal_representation = int(string, 2)
