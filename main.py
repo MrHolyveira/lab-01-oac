@@ -132,10 +132,24 @@ class MIPS_to_hex_converter():
             self.__solve_text(text_area)
     
     def __solve_data(self, data):
-        pass
+        answer = 'DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n'
+        instruction = 0
+
+        for line in data:
+            variables = line.split('.word')[1].split(',')
+
+            for variable in variables:
+                variable = int(variable)
+                answer += self.__handle_integer_to_hex(instruction)+ ' : '
+                answer +=self.__handle_integer_to_hex(variable) +'\n'
+                instruction+=1
+                
+        answer += '\nEND;'
+        print(answer)
+        return
 
     def __solve_text(self, data):
-        answer = ''
+        answer = 'DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n'
         for instruction in data:
             call = instruction.split()[0]
             values = instruction[len(call):]
@@ -155,9 +169,15 @@ class MIPS_to_hex_converter():
 
             else:
                 raise ValueError("Unknown instruction")
+        answer += '\nEND;'
 
-        print(answer)
+        #print(answer)
         return answer
+    
+    def __handle_integer_to_hex(self, number):
+        return str(hex(number)[2:].zfill(8))
+
+
 
 
     def __solve_J_type_instructions(self, values, call, instruction):
