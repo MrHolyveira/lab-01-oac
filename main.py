@@ -15,7 +15,7 @@ class MIPS_to_hex_converter():
         'madd',
         'msubu',
         'bgezal',
-        'Label',
+        'Label:',
         'movn',
         'mul',
         'teq',
@@ -131,37 +131,57 @@ class MIPS_to_hex_converter():
         pass
 
     def __solve_text(self, data):
+        answer = ''
         for instruction in data:
-            binary_answer = ""
             call = instruction.split()[0]
             values = instruction[len(call):]
             values = re.sub(r' ', '', values).split(',')
+
             if call in self.R_type_instructions_func_codes.keys():
-                while len(values) != 3:
-                    values.append('R_binary_zero')
-                binary_answer += "000000"
-                binary_answer += self.register_translations.get(values[1])
-                binary_answer += self.register_translations.get(values[2])
-                binary_answer += self.register_translations.get(values[0])
-                ''' 
-                TODO: implement shift amount the correct way.
-                '''
-                #shift amount
-                binary_answer += "00000"
+                answer += self.__solve_R_type_instructions(values, call)
 
-                binary_answer += self.R_type_instructions_func_codes.get(call)
-
-                answer = self.__convert_binary_to_hex(binary_answer)
-                import pdb; pdb.set_trace()
-                
             elif call in self.I_type_instructions_op_codes.keys():
                 pass
+
             elif call in self.J_type_instructions_op_codes.keys():
                 pass
+
             elif call in self.to_implement_instructions:
                 pass
+
             else:
                 raise ValueError("Unknown instruction")
+                
+        print(answer)
+        return answer
+
+    def __solve_R_type_instructions(self, values, call):
+        binary_answer = ''
+
+        register_values = self.__get_register_values(values)
+        while len(register_values) != 3:
+            register_values.append(self.register_translations.get('R_binary_zero'))
+
+        binary_answer += "000000"
+
+        binary_answer += self.register_translations.get(register_values[1])
+        binary_answer += self.register_translations.get(register_values[2])
+        binary_answer += self.register_translations.get(register_values[0])
+
+        binary_answer += self.__get_shift_amount(values)
+
+        binary_answer += self.R_type_instructions_func_codes.get(call)
+
+        return self.__convert_binary_to_hex(binary_answer) + '\n'
+
+    @staticmethod
+    def __get_shift_amount(values):
+        shift_list = [value for value in values if value[0] != '$']
+        return shift_list[0] if shift_list else '00000'
+
+    @staticmethod
+    def __get_register_values(values):
+        return [value for value in values if value[0] == '$']
 
     @staticmethod
     def __get_clean_data_list(data, split):
