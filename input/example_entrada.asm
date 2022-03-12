@@ -1,5 +1,11 @@
 .data
 a: .word 1, 2, 3
+a1: .word 1, 2, 3
+asvc: .word 1, 2, 3
+adscx: .word 1, 2, 3
+a: .word 1, 2, 3
+a: .word 1, 2, 3
+a: .word 1, 2, 99
 
 .text
 li $t0, 0x10010000
