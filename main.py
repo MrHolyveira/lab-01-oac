@@ -123,6 +123,7 @@ class MIPS_to_hex_converter():
         '$ra': '11111',
         }
 
+
     def execute(self):
         with open(self.input_file, 'r') as f:
             file_text = f.read()
@@ -131,6 +132,7 @@ class MIPS_to_hex_converter():
             self.__solve_data(data_area)
             self.__solve_text(text_area)
     
+
     def __solve_data(self, data):
         answer = 'DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n'
         instruction = 0
@@ -147,6 +149,7 @@ class MIPS_to_hex_converter():
         answer += '\nEND;'
         print(answer)
         return
+
 
     def __solve_text(self, data):
         answer = 'DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n'
@@ -171,13 +174,12 @@ class MIPS_to_hex_converter():
                 raise ValueError("Unknown instruction")
         answer += '\nEND;'
 
-        #print(answer)
+        print(answer)
         return answer
     
+
     def __handle_integer_to_hex(self, number):
         return str(hex(number)[2:].zfill(8))
-
-
 
 
     def __solve_J_type_instructions(self, values, call, instruction):
@@ -190,6 +192,7 @@ class MIPS_to_hex_converter():
         binary_answer += immediate
 
         return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
+
 
     def __solve_I_type_instructions(self, values, call, instruction):
         binary_answer = ''
