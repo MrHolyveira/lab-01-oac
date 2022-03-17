@@ -7,85 +7,107 @@ class MIPS_to_hex_converter():
 
         self.branch_instructions_list = ['beq', 'bne', 'blez', 'bgtz']
 
-        '''
-        TODO:   These instructions are yet to be implemented these instructions
-        '''
         self.to_implement_instructions = [
-        'li',
-        'clo',
-        'bgez',
-        'madd',
-        'msubu',
-        'bgezal',
-        'Label:',
-        'movn',
-        'mul',
-        'teq',
-        'add.d',
-        'add.s',
-        'sub.d',
-        'sub.s',
-        'c.eq.d',
-        'c.eq.s',
-        'mul.d',
-        'mul.s',
-        'div.d'
+            'li',
+            'c.eq.d',
+            'c.eq.s',
         ]
         
+        self.R_type_instructions_op_codes = {
+            'clo': '011100',
+            'mul': '011100',
+            'add.d': '010001',
+            'add.s': '010001',
+            'sub.d': '010001',
+            'sub.s': '010001',
+            'mult.d': '010001',
+            'mult.s': '010001',
+            'div.d': '010001',
+        }
+
         self.I_type_instructions_op_codes = {
-        'addi': '001000',
-        'addiu': '001001',
-        'andi': '001100',      
-        'beq': '000100',
-        'bne': '000101',
-        'bgtz': '000111',
-        'blez': '000110',
-        'lb': '100000',
-        'lbu': '100100',
-        'lui': '001111',
-        'lw': '100011',
-        'sb': '101000',
-        'sh': '101001',
-        'slti': '001010',
-        'sltiu': '001011',
-        'sw': '101011',
-        'ori': '001101',
-        'xori': '001110',
+            'addi': '001000',
+            'addiu': '001001',
+            'andi': '001100',      
+            'beq': '000100',
+            'bne': '000101',
+            'bgtz': '000111',
+            'blez': '000110',
+            'lb': '100000',
+            'lbu': '100100',
+            'lui': '001111',
+            'lw': '100011',
+            'sb': '101000',
+            'sh': '101001',
+            'slti': '001010',
+            'sltiu': '001011',
+            'sw': '101011',
+            'ori': '001101',
+            'xori': '001110',
+            'teq': '000000',
+            'madd': '011100',
+            'msubu': '011100'
         }
 
         self.J_type_instructions_op_codes  = {
-        'j': '000010',
-        'jal': '000011',
+            'j': '000010',
+            'jal': '000011',
         }
 
         #most R type instructions have 000000 op codes by default
         self.R_type_instructions_func_codes = {
-        'add': '100000', 
-        'addu': '100001',
-        'and': '100100',
-        'div': '011010',
-        'divu': '011011',
-        'jalr': '001001',
-        'jr': '001000',
-        'mfhi': '010000',
-        'mthi': '010001',
-        'mflo': '010010',
-        'mtlo': '010011',
-        'mult': '011000',
-        'multu': '011001',
-        'nor': '100111',
-        'xor': '100110',
-        'or': '100101',
-        'slt': '101010',
-        'sltu': '101011',
-        'sll': '000000',
-        'srl': '000010',
-        'sra': '000011',
-        'sllv': '000100',
-        'srav': '000111',
-        'srlv': '000110',
-        'sub': '100010',
-        'subu': '100011',
+            'add': '100000', 
+            'addu': '100001',
+            'and': '100100',
+            'div': '011010',
+            'divu': '011011',
+            'jalr': '001001',
+            'jr': '001000',
+            'mfhi': '010000',
+            'mthi': '010001',
+            'mflo': '010010',
+            'mtlo': '010011',
+            'mult': '011000',
+            'multu': '011001',
+            'nor': '100111',
+            'xor': '100110',
+            'or': '100101',
+            'slt': '101010',
+            'sltu': '101011',
+            'sll': '000000',
+            'srl': '000010',
+            'sra': '000011',
+            'sllv': '000100',
+            'srav': '000111',
+            'srlv': '000110',
+            'sub': '100010',
+            'subu': '100011',
+            'clo': '100001',
+            'movn': '001011',
+            'mul': '000010',
+            'add.d': '000000',
+            'add.s': '000000',
+            'sub.d': '000001',
+            'sub.s': '000001',
+            'mult.d': '000010',
+            'mult.s': '000010',
+            'div.d': '000011',
+        }
+
+        self.special_R_type_cases = {
+            'add.d': '10001',
+            'add.s': '10000',
+            'sub.d': '10001',
+            'sub.s': '10000',
+            'mult.d': '10001',
+            'mult.s': '10000',
+            'div.d': '10001',
+        }
+
+        self.special_I_type_cases = {
+            'teq': '0000000000110100', 
+            'madd': '0000000000000000',
+            'msubu': '0000000000000101'
         }
         
         self.register_translations = {
@@ -154,8 +176,8 @@ class MIPS_to_hex_converter():
     def __solve_text(self, data):
         answer = 'DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n'
         for instruction in data:
-            call = instruction.split()[0]
-            values = instruction[len(call):]
+            call = self.__check_if_label(instruction)
+            values = re.search(re.escape(call)+r'(.*)', instruction).group(1)
             values = re.sub(r' ', '', values).split(',')
 
             if call in self.R_type_instructions_func_codes.keys():
@@ -171,7 +193,9 @@ class MIPS_to_hex_converter():
                 pass
 
             else:
-                raise ValueError("Unknown instruction")
+                print(call)
+                msg = "Unknown instruction: " + instruction
+                raise ValueError(msg)
         answer += '\nEND;'
 
         print(answer)
@@ -184,7 +208,6 @@ class MIPS_to_hex_converter():
 
     def __solve_J_type_instructions(self, values, call, instruction):
         binary_answer = ''
-        register_values = self.__get_register_values(values)
         immediate = self.__get_immediate_value(values, 26)
 
         binary_answer += self.J_type_instructions_op_codes.get(call)
@@ -197,6 +220,9 @@ class MIPS_to_hex_converter():
     def __solve_I_type_instructions(self, values, call, instruction):
         binary_answer = ''
         register_values = self.__get_register_values(values)
+        binary_answer += self.__check_special_I_type_cases(call, register_values)
+        if binary_answer:
+            return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
         immediate = self.__get_immediate_value(values, 16)
 
         binary_answer += self.I_type_instructions_op_codes.get(call)    
@@ -209,6 +235,8 @@ class MIPS_to_hex_converter():
                 binary_answer += self.register_translations.get(register_values[0])
                 if call == "bgez":
                     binary_answer += '00001'
+                elif call == "bgezeal":
+                    binary_answer += '10001'
                 else:
                     binary_answer += '00000'
         else:
@@ -225,10 +253,16 @@ class MIPS_to_hex_converter():
 
         register_values = self.__get_register_values(values)
         while len(register_values) != 3:
-            register_values.append(self.register_translations.get('$zero'))
+            register_values.append('$zero')
 
-        binary_answer += "000000"
+        opcode_value = "000000" if not self.R_type_instructions_op_codes.get(call) else self.R_type_instructions_op_codes.get(call)
+        binary_answer += self.__check_special_R_type_cases(call, register_values, opcode_value)
+        if binary_answer:
+            return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
+        binary_answer += opcode_value
 
+
+        
         binary_answer += self.register_translations.get(register_values[1])
         binary_answer += self.register_translations.get(register_values[2])
         binary_answer += self.register_translations.get(register_values[0])
@@ -239,6 +273,36 @@ class MIPS_to_hex_converter():
 
         return self.__convert_binary_to_hex(binary_answer) + '; % ' + instruction + ' %\n'
 
+
+
+    def __check_special_R_type_cases(self, call, register_values, opcode_value):
+        binary_answer = ''
+        if call in self.special_R_type_cases:
+            binary_answer += opcode_value
+            binary_answer += self.special_R_type_cases.get(call)
+            binary_answer += self.register_translations.get(register_values[2])
+            binary_answer += self.register_translations.get(register_values[1])
+            binary_answer += self.register_translations.get(register_values[0])
+            binary_answer += self.R_type_instructions_func_codes.get(call)
+        return binary_answer
+
+
+    def __check_special_I_type_cases(self, call, register_values):
+        binary_answer = ''
+        if call in self.special_I_type_cases:
+            binary_answer += self.I_type_instructions_op_codes.get(call)
+            binary_answer += self.register_translations.get(register_values[0])
+            binary_answer += self.register_translations.get(register_values[1])
+            binary_answer += self.special_I_type_cases.get(call)
+        return binary_answer
+
+
+    def __check_if_label(self, instruction):
+        call = instruction.split()[0]
+        if call[-1] == ':':
+            return re.search(r': (\S*) ', instruction).group(1)
+        else:
+            return call
 
     @staticmethod
     def __get_immediate_value(values, binary_length):
