@@ -149,6 +149,38 @@ class MipsToHexConverter:
             '$sp': '11101',
             '$fp': '11110',
             '$ra': '11111',
+            '$f0': '00000',
+            '$f1': '00001',
+            '$f2': '00010',
+            '$f3': '00011',
+            '$f4': '00100',
+            '$f5': '00101',
+            '$f6': '00110',
+            '$f7': '00111',
+            '$f8': '01000',
+            '$f9': '01001',
+            '$f10': '01010',
+            '$f11': '01011',
+            '$f12': '01100',
+            '$f13': '01101',
+            '$f14': '01110',
+            '$f15': '01111',
+            '$f16': '10000',
+            '$f17': '10001',
+            '$f18': '10010',
+            '$f19': '10011',
+            '$f20': '10100',
+            '$f21': '10101',
+            '$f22': '10110',
+            '$f23': '10111',
+            '$f24': '11000',
+            '$f25': '11001',
+            '$f26': '11010',
+            '$f27': '11011',
+            '$f28': '11100',
+            '$f29': '11101',
+            '$f30': '11110',
+            '$f31': '11111',
         }
 
     def execute(self):
@@ -176,7 +208,7 @@ class MipsToHexConverter:
             for variable in variables:
                 variable = int(variable)
                 answer += self.__handle_integer_to_hex(instruction) + ' : '
-                answer += self.__handle_integer_to_hex(variable) + '\n'
+                answer += self.__handle_integer_to_hex(variable) + ';\n'
                 instruction += 1
 
         answer += '\nEND;'
