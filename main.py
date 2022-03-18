@@ -239,6 +239,10 @@ class MipsToHexConverter:
 
         elif call in self.pseudo_instructions:
             answer = self.__solve_pseudo_instructions(values, call, instruction)
+        
+        elif call in self.to_implement_instructions:
+            msg = "Not implemented yet instruction: " + instruction
+            raise ValueError(msg)
 
         else:
             msg = "Unknown instruction: " + instruction
