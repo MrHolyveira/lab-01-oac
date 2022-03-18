@@ -409,7 +409,7 @@ class MipsToHexConverter:
 
 if __name__ == "__main__":
     input_file = "input/example_entrada.asm"
-    output_data_file = "output/example_saida_data_nosso.mif"
-    output_text_file = "output/example_saida_text_nosso.mif"
+    output_data_file = "output/saida_data.mif"
+    output_text_file = "output/aida_tex.mif"
     converter = MipsToHexConverter(input_file, output_data_file, output_text_file)
     converter.execute()
